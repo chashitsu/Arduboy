@@ -27,6 +27,8 @@ void Arduboy::begin()
 {
   boot(); // required
 
+  startupButtons(); // handle system control buttons
+
   // Audio
   tunes.initChannel(PIN_SPEAKER_1);
   tunes.initChannel(PIN_SPEAKER_2);
@@ -706,4 +708,22 @@ void Arduboy::swap(int16_t& a, int16_t& b)
   int temp = a;
   a = b;
   b = temp;
+}
+
+// Handle buttons held on startup for system control
+//
+// If button B is held, other buttons are tested to perform
+// system control functions, so they are available to all sketches
+void Arduboy::systemButtons() {
+  while (getInput() & B_BUTTON) {
+    if ((getInput() & UP_BUTTON) && !EEPROM.read(EEPROM_AUDIO_ON_OFF)) {  // audio on
+      EEPROM.write(EEPROM_AUDIO_ON_OFF, 0xFF);
+    }
+
+    if ((getInput() & DOWN_BUTTON) && EEPROM.read(EEPROM_AUDIO_ON_OFF)) {  // audio off
+      EEPROM.write(EEPROM_AUDIO_ON_OFF, 0);
+    }
+
+    delay(500);
+  }
 }

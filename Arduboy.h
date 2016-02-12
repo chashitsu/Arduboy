@@ -185,6 +185,9 @@ public:
 protected:
   unsigned char sBuffer[(HEIGHT*WIDTH)/8];
 
+  // handle buttons held on startup for system control
+  void systemButtons();
+
 
 // Adafruit stuff
 protected:
