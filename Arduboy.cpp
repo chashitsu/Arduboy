@@ -36,149 +36,49 @@ void Arduboy::begin()
   audio.begin();
 }
 
+const uint8_t PROGMEM HorizScrollCmd[] = {
+  0x2E, // disable scroll
+
+  0x27, // left horizontal scroll
+  0x00, // dummy
+  0x02, // start page
+  0x07, // speed
+  0x05, // end page
+  0x00, // dummy
+  0xFF, // dummy
+
+  0x2F  // enable scroll
+};
+
 void Arduboy::bootLogo()
 {
   const unsigned char *logo = arduboy_logo;
-  uint16_t mem_position = 20+128*5;
-  uint8_t c=0;
+  uint16_t mem_position = 20 + 128 * 3;
+  uint8_t c = 0;
  
-  // mem_position = 20+128*5;
-  // logo = arduboy_logo;
-  c = 0;
-    while (c < 88*2) {
-      sBuffer[mem_position++] = pgm_read_byte(logo);
-      logo++;
-      c++;
-      if(c==88) {
-        mem_position+=128-88;
-      }
+  while (c < 88 * 2) {
+    sBuffer[mem_position++] = pgm_read_byte(logo);
+    logo++;
+    c++;
+    if (c == 88) {
+      mem_position += 128 - 88;
     }
-    display();
-
-  // sendLCDCommand(0xc0);
-
-  // invert(true);
-
-
-  sendLCDCommand(0xa8);
-  sendLCDCommand(63-24);
-
-  sendLCDCommand(0xd3);
-  sendLCDCommand(24);
-
-
-  // sendLCDCommand(0x81);
-  // sendLCDCommand(0x22);
-  // sendLCDCommand(0xD9);
-  // sendLCDCommand(0x22);
-
-
-  // sendLCDCommand(0xD5);  
-  // sendLCDCommand(0b11110000);  
-  // sendLCDCommand(0b11110000);  
-
-  // delay(200);
-  boolean changed=false;
-
-  // for (uint16_t d=55000; d>25000; d-=250)
-  // long d=35000;
-  // long last;
-  // while(true)
-  {
-
-    // if (changed) {
-    // setTextSize(1);
-    // setCursor(0,40);
-    // print(d);
-    // display();
-    // }
-
-    // last=micros();
-    for (uint8_t y = 0x7f; y> 0x40+16; y--) {
-
-
-      // while((micros()-last) < d) {
-
-      //   if (micros()/10%10==1) {
-      //     if (pressed(LEFT_BUTTON)) {
-      //       d-=3;
-      //       changed=true;
-      //     }
-      //     if (pressed(RIGHT_BUTTON)) {
-      //       d+=3;
-      //       changed=true;
-      //     }
-      //   }
-      // }
-      // last=micros();
-
-
-      // sendLCDCommand(0xd3);
-      // clearDisplay();
-      // display();
-      // sendLCDCommand(0xa5);  
-  // sendLCDCommand(0b11110000);  
-      // sendLCDCommand(0xa7);  
-      // delay(2);
-      // sendLCDCommand(0xa4);  
-      // sendLCDCommand(0xa6);  
-
-
-    
-    
-      blank();
-      sendLCDCommand(y);
-      delay(5);
-      display();
-      // delay(2);
-      
-
-
-      // sendLCDCommand(y);
-      // delay(7);
-      // delay(5);
-      // display();
-      // delayMicroseconds(d);
-      // delayMicroseconds(d);
-      // delayMicroseconds(d);
-      // delayMicroseconds(d%1000);
-      delay(25);
-      // delayMicroseconds(d);
-    }
-    delay(1500);
-
-    sendLCDCommand(0xa8);
-    sendLCDCommand(0x3f);
-
-    sendLCDCommand(0xd3);
-    sendLCDCommand(0);
-
-    sendLCDCommand(0x7f);
-    clear();
-
-      // pinMode(PIN_SPEAKER_1, OUTPUT);
-      volatile byte *spkr  = PIN_SPEAKER_1_PORT;
-
-      // for (int16_t t = 0; t < 10000; t++) {
-      // uint8_t pcm = t * ((t>>12|t>>8)&63&t>>4);
-      // uint8_t softpwm = 0;
-      // do {
-      //     *spkr = *spkr & (~PIN_SPEAKER_1_BITMASK) | (softpwm < pcm) ? PIN_SPEAKER_1_BITMASK : 0;
-      // } while(++softpwm != 0);
-
-// i = 0; i<200; i++) 
-      //    *spkr ^= PIN_SPEAKER_1_BITMASK;
-      
-      // }
-         // delayMicroseconds(1500-i);
-        // delayMQSSSicroseconds(- i^2 -i^4);
-         // delayMicroseconds(1000 - abs((i % 500) - 250));
-      // }
-      // speaker off
-      *spkr &= ~PIN_SPEAKER_1_BITMASK;
   }
+  display();
 
-  // while(true);
+  delay(800);
+
+  LCDCommandMode();
+  for (int8_t i=0; i < sizeof(HorizScrollCmd); i++) {
+    SPI.transfer(pgm_read_byte(HorizScrollCmd + i));
+  }
+  LCDDataMode();
+
+  delay(3650);
+
+  sendLCDCommand(0x2E); // disable scroll
+
+  delay (500);
 }
 
 /* Frame management */
