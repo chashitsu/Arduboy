@@ -69,11 +69,14 @@ void Arduboy::bootLogo()
   delay(800);
 
   LCDCommandMode();
-  for (int8_t i=0; i < sizeof(HorizScrollCmd); i++) {
+  for (int8_t i = 0; i < sizeof(HorizScrollCmd); i++) {
     SPI.transfer(pgm_read_byte(HorizScrollCmd + i));
   }
   LCDDataMode();
 
+  // This delay is currently tweaked so the logo scrolls twice back
+  //  to center. I'm not sure how precise this will be, due to
+  //  slightly differing internal clock speeds between displays.
   delay(3650);
 
   sendLCDCommand(0x2E); // disable scroll
