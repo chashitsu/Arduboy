@@ -27,7 +27,7 @@ void Arduboy::begin()
 {
   boot(); // required
 
-  startupButtons(); // handle system control buttons
+  systemButtons(); // handle system control buttons
 
   // Audio
   tunes.initChannel(PIN_SPEAKER_1);
