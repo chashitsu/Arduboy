@@ -36,10 +36,15 @@
 #ifdef ARDUBOY_10
 
 #ifdef __AVR_ATmega328P__
-#define CS 2
+#define CS A4
+#define DC 4
+#define RST 2
+
+#define RED_LED 10
+#define GREEN_LED 6
+#define BLUE_LED 9
 #else
 #define CS 12
-#endif
 #define DC 4
 #define RST 6
 
@@ -48,6 +53,7 @@
 #define BLUE_LED 9
 #define TX_LED 30
 #define RX_LED 17
+#endif
 
 // pin values for buttons, probably shouldn't use these
 #define PIN_LEFT_BUTTON A2
