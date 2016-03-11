@@ -200,7 +200,9 @@ void ArduboyCore::bootPowerSaving()
   // timer 0 is for millis()
   // timers 1 and 3 are for music and sounds
   power_timer2_disable();
+#ifndef __AVR_ATmega328P__
   power_usart1_disable();
+#endif
   // we need USB, for now (to allow triggered reboots to reprogram)
   // power_usb_disable()
 }
@@ -320,12 +322,21 @@ uint8_t ArduboyCore::buttonsState()
   // A and B
   buttons = buttons | (((~PINF) & B11000000) >> 6);
 #elif defined(ARDUBOY_10)
+#ifdef __AVR_ATmega328P__
+  // down, up, left right
+  buttons = ((~PINC) & B00001111);
+  // A (left)
+  buttons = buttons | (((~PIND) & B10000000));
+  // B (right)
+  buttons = buttons | (((~PINB) & B00000001) << 6);
+#else
   // down, up, left right
   buttons = ((~PINF) & B11110000);
   // A (left)
   buttons = buttons | (((~PINE) & B01000000) >> 3);
   // B (right)
   buttons = buttons | (((~PINB) & B00010000) >> 2);
+#endif
 #endif
 
   return buttons;

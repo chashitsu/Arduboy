@@ -137,10 +137,15 @@ int Arduboy::cpuLoad()
 void Arduboy::initRandomSeed()
 {
   power_adc_enable(); // ADC on
+#ifdef __AVR_ATmega328P__
+  randomSeed(analogRead(4));
+#else
   randomSeed(~rawADC(ADC_TEMP) * ~rawADC(ADC_VOLTAGE) * ~micros() + micros());
+#endif
   power_adc_disable(); // ADC off
 }
 
+#ifndef __AVR_ATmega328P__
 uint16_t Arduboy::rawADC(byte adc_bits)
 {
   ADMUX = adc_bits;
@@ -155,6 +160,7 @@ uint16_t Arduboy::rawADC(byte adc_bits)
 
   return ADC;
 }
+#endif
 
 /* Graphics */
 

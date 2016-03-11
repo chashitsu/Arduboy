@@ -35,7 +35,11 @@
 
 #ifdef ARDUBOY_10
 
+#ifdef __AVR_ATmega328P__
+#define CS 2
+#else
 #define CS 12
+#endif
 #define DC 4
 #define RST 6
 
@@ -54,13 +58,32 @@
 #define PIN_B_BUTTON 8
 
 // bit values for button states
+#ifdef __AVR_ATmega328P__
+#define LEFT_BUTTON _BV(2)
+#define RIGHT_BUTTON _BV(1)
+#define UP_BUTTON _BV(0)
+#define DOWN_BUTTON _BV(3)
+#define A_BUTTON _BV(7)
+#define B_BUTTON _BV(6)
+#else
 #define LEFT_BUTTON _BV(5)
 #define RIGHT_BUTTON _BV(6)
 #define UP_BUTTON _BV(7)
 #define DOWN_BUTTON _BV(4)
 #define A_BUTTON _BV(3)
 #define B_BUTTON _BV(2)
+#endif
 
+#ifdef __AVR_ATmega328P__
+#define PIN_SPEAKER_1 5
+#define PIN_SPEAKER_2 3
+
+#define PIN_SPEAKER_1_PORT &PORTD
+#define PIN_SPEAKER_2_PORT &PORTD
+
+#define PIN_SPEAKER_1_BITMASK _BV(5)
+#define PIN_SPEAKER_2_BITMASK _BV(3)
+#else
 #define PIN_SPEAKER_1 5
 #define PIN_SPEAKER_2 13
 
@@ -69,6 +92,7 @@
 
 #define PIN_SPEAKER_1_BITMASK _BV(6)
 #define PIN_SPEAKER_2_BITMASK _BV(7)
+#endif
 
 #elif defined(AB_DEVKIT)
 

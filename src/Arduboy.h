@@ -30,10 +30,12 @@
 #define WHITE 1 //< lit pixel
 #define BLACK 0 //< unlit pixel
 
+#ifndef __AVR_ATmega328P__
 // compare Vcc to 1.1 bandgap
 #define ADC_VOLTAGE (_BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1))
 // compare temperature to 2.5 internal reference and _BV(MUX5)
 #define ADC_TEMP (_BV(REFS0) | _BV(REFS1) | _BV(MUX2) | _BV(MUX1) | _BV(MUX0))
+#endif
 
 
 class Arduboy : public ArduboyCore
@@ -200,8 +202,10 @@ public:
   bool post_render;
   uint8_t lastFrameDurationMs;
 
+#ifndef __AVR_ATmega328P__
   /// useful for getting raw approximate voltage values
   uint16_t rawADC(byte adc_bits);
+#endif
 
 protected:
   unsigned char sBuffer[(HEIGHT*WIDTH)/8];
