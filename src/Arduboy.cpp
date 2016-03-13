@@ -138,7 +138,7 @@ void Arduboy::initRandomSeed()
 {
   power_adc_enable(); // ADC on
 #ifdef __AVR_ATmega328P__
-  randomSeed(analogRead(4));
+  randomSeed(analogRead(7));
 #else
   randomSeed(~rawADC(ADC_TEMP) * ~rawADC(ADC_VOLTAGE) * ~micros() + micros());
 #endif
