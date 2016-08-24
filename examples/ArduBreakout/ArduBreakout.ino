@@ -64,13 +64,13 @@ void playTone(unsigned int frequency, unsigned long duration)
 void setup()
 {
   arduboy.begin();
-  arduboy.setFrameRate(60);
+  arduboy.setFrameRate(25);
 }
 
 void loop()
 {
   // pause render until it's time for the next frame
-  if (!(arduboy.nextFrame()))
+  if (!(arduboy.newFrame()))
     return;
 
   //Title screen loop switches from title screen
@@ -120,10 +120,10 @@ void loop()
   else
   {
     drawGameOver();
-    if (score > 0)
-    {
-      enterHighScore(2);
-    }
+//    if (score > 0)
+//    {
+//      enterHighScore(2);
+//    }
 
     arduboy.clear();
     initialDraw = false;
@@ -217,7 +217,7 @@ void moveBall()
     }
 
     //Bounce off paddle
-    if (xb + 1 >= xPaddle && xb <=x Paddle + 12 && yb + 2 >= 63 && yb <= 64)
+    if (xb + 1 >= xPaddle && xb <= xPaddle + 12 && yb + 2 >= 63 && yb <= 64)
     {
       dy = -dy;
       dx = ((xb - (xPaddle + 6)) / 3); //Applies spin on the ball
@@ -456,17 +456,22 @@ boolean displayHighScores(byte file)
     arduboy.setCursor(x,y+(i*8));
     arduboy.print(text_buffer);
     arduboy.display();
-    hi = EEPROM.read(address + (5*i));
-    lo = EEPROM.read(address + (5*i) + 1);
+//    hi = EEPROM.read(address + (5*i));
+//    lo = EEPROM.read(address + (5*i) + 1);
+    hi = 0xff;
+    lo = 0xff;
 
     if ((hi == 0xFF) && (lo == 0xFF))
       score = 0;
     else
       score = (hi << 8) | lo;
 
-    initials[0] = (char)EEPROM.read(address + (5*i) + 2);
-    initials[1] = (char)EEPROM.read(address + (5*i) + 3);
-    initials[2] = (char)EEPROM.read(address + (5*i) + 4);
+//    initials[0] = (char)EEPROM.read(address + (5*i) + 2);
+//    initials[1] = (char)EEPROM.read(address + (5*i) + 3);
+//    initials[2] = (char)EEPROM.read(address + (5*i) + 4);
+    initials[0] = 'A';
+    initials[1] = 'B';
+    initials[2] = 'C';
 
     if (score > 0)
     {
@@ -489,9 +494,9 @@ boolean titleScreen()
   //Clears the screen
   arduboy.clear();
   arduboy.setCursor(16,22);
-  arduboy.setSize(2);
+  arduboy.setTextSize(2);
   arduboy.print("ARAKNOID");
-  arduboy.setSize(1);
+  arduboy.setTextSize(1);
   arduboy.display();
 
   if (pollFireButton(25))
@@ -512,9 +517,9 @@ boolean titleScreen()
     //Removes "Press FIRE"
     arduboy.clear();
     arduboy.setCursor(16,22);
-    arduboy.setSize(2);
+    arduboy.setTextSize(2);
     arduboy.print("ARAKNOID");
-    arduboy.setSize(1);
+    arduboy.setTextSize(1);
     arduboy.display();
 
     arduboy.display();
@@ -623,6 +628,7 @@ void enterInitials()
 
 }
 
+#if 0
 void enterHighScore(byte file)
 {
   // Each block of EEPROM has 10 high scores, and each high score entry
@@ -691,4 +697,5 @@ void enterHighScore(byte file)
     }
   }
 }
+#endif
 

@@ -7,7 +7,9 @@
 #define ARDUBOY_AUDIO_H
 
 #include <Arduino.h>
+#if defined ARDUINO_ARCH_AVR
 #include <EEPROM.h>
+#endif
 
 class ArduboyAudio
 {

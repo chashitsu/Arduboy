@@ -12,7 +12,7 @@ bool ArduboyAudio::audio_enabled = false;
 void ArduboyAudio::on()
 {
   // fire up audio pins
-#ifdef ARDUBOY_10
+#ifndef AB_DEVKIT
   pinMode(PIN_SPEAKER_1, OUTPUT);
   pinMode(PIN_SPEAKER_2, OUTPUT);
 #else
@@ -35,12 +35,16 @@ void ArduboyAudio::off()
 
 void ArduboyAudio::saveOnOff()
 {
+#ifndef ARDUBOY_Z
   EEPROM.update(EEPROM_AUDIO_ON_OFF, audio_enabled);
+#endif
 }
 
 void ArduboyAudio::begin()
 {
+#ifndef ARDUBOY_Z
   if (EEPROM.read(EEPROM_AUDIO_ON_OFF))
+#endif
     on();
 }
 

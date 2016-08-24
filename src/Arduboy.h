@@ -41,9 +41,9 @@
 #define BLACK  0 // pixel off
 
 /// Compare Vcc to 1.1 bandgap.
-#define ADC_VOLTAGE (_BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1))
-/// Compare temperature to 2.5 internal reference and _BV(MUX5).
-#define ADC_TEMP (_BV(REFS0) | _BV(REFS1) | _BV(MUX2) | _BV(MUX1) | _BV(MUX0))
+#define ADC_VOLTAGE (bit(REFS0) | bit(MUX4) | bit(MUX3) | bit(MUX2) | bit(MUX1))
+/// Compare temperature to 2.5 internal reference and bit(MUX5).
+#define ADC_TEMP (bit(REFS0) | bit(REFS1) | bit(MUX2) | bit(MUX1) | bit(MUX0))
 
 class ArduboyBase : public ArduboyCore
 {
@@ -111,6 +111,7 @@ public:
    */
   void flashlight();
 
+#ifndef ARDUBOY_Z
   /**
    * Provide system control during the boot sequence.
    * \details
@@ -119,6 +120,7 @@ public:
    * are held during an Arduboy's startup.
    */
   void systemButtons();
+#endif
 
   /**
    * Scrolls in the Arduboy logo
@@ -510,12 +512,14 @@ public:
    */
   int cpuLoad();
 
+#ifdef ARDUINO_ARCH_AVR
   /**
    * useful for getting raw approximate voltage values
    * \param adc_bits byte to specificy adc bits
    * \return Return ADC as an unsigned 16 bit integer.
    */
   uint16_t rawADC(uint8_t adc_bits);
+#endif
 
 protected:
 

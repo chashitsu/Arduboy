@@ -1,8 +1,7 @@
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-
 #ifndef FONT5X7_H
 #define FONT5X7_H
+
+#include <avr/pgmspace.h>
 
 // standard ascii 5x7 font
 const static uint8_t font[] PROGMEM =

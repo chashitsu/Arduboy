@@ -8,18 +8,20 @@
 #ifndef ARDUBOY_CORE_H
 #define ARDUBOY_CORE_H
 
-#include <avr/power.h>
 #include <SPI.h>
-#include <avr/sleep.h>
 #include <limits.h>
+#ifdef ARDUINO_ARCH_AVR
+#include <avr/power.h>
+#include <avr/sleep.h>
+#endif
 
 
 // main hardware compile flags
 
-#if !defined(ARDUBOY_10) && !defined(AB_DEVKIT)
+#if !defined(ARDUBOY_10) && !defined(AB_DEVKIT) && !defined(ARDUBOY_Z)
 /// defaults to Arduboy Release 1.0 if not using a boards.txt file
 /**
- * we default to Arduboy Release 1.0 if a compile flag has not been
+ * we default to Arduboy Release 1.0 or ArduboyZ if a compile flag hasn't been
  * passed to us from a boards.txt file
  *
  * if you wish to compile for the devkit without using a boards.txt
@@ -29,8 +31,13 @@
  *     // #define ARDUBOY_10
  *     #define AB_DEVKIT
  */
+#if defined ARDUINO_ARCH_SAMD
+#define ARDUBOY_Z
+#else
 #define ARDUBOY_10   //< compile for the production Arduboy v1.0
 // #define AB_DEVKIT    //< compile for the official dev kit
+#endif
+
 #endif
 
 
@@ -41,11 +48,50 @@
 #define RGB_ON LOW   // for digitially setting an RGB LED on
 #define RGB_OFF HIGH // for digitially setting an RGB LED off
 
-#ifdef ARDUBOY_10
+#if defined ARDUBOY_Z
 
-#define CS 12
-#define DC 4
-#define RST 6
+#define DISPLAY_CS 10
+#define DISPLAY_DC 6
+#define DISPLAY_RST 7
+
+#define SD_CARD_CS 2
+
+#define RED_LED 3
+#define GREEN_LED 8
+#define BLUE_LED 9
+#define TX_LED PIN_LED_TXL
+#define RX_LED PIN_LED_RXL
+
+// pin values for buttons, probably shouldn't use these
+#define PIN_LEFT_BUTTON 0
+#define PIN_RIGHT_BUTTON 1
+#define PIN_UP_BUTTON 4
+#define PIN_DOWN_BUTTON A3
+#define PIN_A_BUTTON A1
+#define PIN_B_BUTTON A2
+
+// bit values for button states
+#define LEFT_BUTTON bit(7)
+#define RIGHT_BUTTON bit(6)
+#define UP_BUTTON bit(4)
+#define DOWN_BUTTON bit(0)
+#define A_BUTTON bit(1)
+#define B_BUTTON bit(2)
+
+#define PIN_SPEAKER_1 5
+#define PIN_SPEAKER_2 A0
+
+#define PIN_SPEAKER_1_PORT digitalPinToPort(PIN_SPEAKER_1)
+#define PIN_SPEAKER_2_PORT digitalPinToPort(PIN_SPEAKER_2)
+
+#define PIN_SPEAKER_1_BITMASK digitalPinToBitMask(PIN_SPEAKER_1)
+#define PIN_SPEAKER_2_BITMASK digitalPinToBitMask(PIN_SPEAKER_2)
+
+#elif defined ARDUBOY_10
+
+#define DISPLAY_CS 12
+#define DISPLAY_DC 4
+#define DISPLAY_RST 6
 
 #define RED_LED 10
 #define GREEN_LED 11
@@ -62,12 +108,12 @@
 #define PIN_B_BUTTON 8
 
 // bit values for button states
-#define LEFT_BUTTON _BV(5)
-#define RIGHT_BUTTON _BV(6)
-#define UP_BUTTON _BV(7)
-#define DOWN_BUTTON _BV(4)
-#define A_BUTTON _BV(3)
-#define B_BUTTON _BV(2)
+#define LEFT_BUTTON bit(5)
+#define RIGHT_BUTTON bit(6)
+#define UP_BUTTON bit(7)
+#define DOWN_BUTTON bit(4)
+#define A_BUTTON bit(3)
+#define B_BUTTON bit(2)
 
 #define PIN_SPEAKER_1 5
 #define PIN_SPEAKER_2 13
@@ -75,14 +121,14 @@
 #define PIN_SPEAKER_1_PORT &PORTC
 #define PIN_SPEAKER_2_PORT &PORTC
 
-#define PIN_SPEAKER_1_BITMASK _BV(6)
-#define PIN_SPEAKER_2_BITMASK _BV(7)
+#define PIN_SPEAKER_1_BITMASK bit(6)
+#define PIN_SPEAKER_2_BITMASK bit(7)
 
-#elif defined(AB_DEVKIT)
+#elif defined AB_DEVKIT
 
-#define CS 6
-#define DC 4
-#define RST 12
+#define DISPLAY_CS 6
+#define DISPLAY_DC 4
+#define DISPLAY_RST 12
 
 // map all LEDs to the single TX LED on DEVKIT
 #define RED_LED 17
@@ -100,16 +146,16 @@
 #define PIN_B_BUTTON A1
 
 // bit values for button states
-#define LEFT_BUTTON _BV(5)
-#define RIGHT_BUTTON _BV(2)
-#define UP_BUTTON _BV(4)
-#define DOWN_BUTTON _BV(6)
-#define A_BUTTON _BV(1)
-#define B_BUTTON _BV(0)
+#define LEFT_BUTTON bit(5)
+#define RIGHT_BUTTON bit(2)
+#define UP_BUTTON bit(4)
+#define DOWN_BUTTON bit(6)
+#define A_BUTTON bit(1)
+#define B_BUTTON bit(0)
 
 #define PIN_SPEAKER_1 A2
 #define PIN_SPEAKER_1_PORT &PORTF
-#define PIN_SPEAKER_1_BITMASK _BV(5)
+#define PIN_SPEAKER_1_BITMASK bit(5)
 // SPEAKER_2 is purposely not defined for DEVKIT as it could potentially
 // be dangerous and fry your hardware (because of the devkit wiring).
 //
@@ -162,10 +208,20 @@ public:
   void static idle();
 
   /**
-   * Put the display in data mode
-   * \fn LCDDataMode
+   * Set up SPI for use by the display
    */
-  void static LCDDataMode();
+  void static displaySPIbegin();
+
+  /**
+   * Release use of SPI by the display
+   */
+  void static displaySPIend();
+
+  /**
+   * Put the display in data mode
+   * \fn displayDataMode
+   */
+  void static displayDataMode();
 
   /**
    * Put the display in command mode.
@@ -176,7 +232,7 @@ public:
    * - https://www.adafruit.com/datasheets/SSD1306.pdf
    * - http://www.eimodule.com/download/SSD1306-OLED-Controller.pdf
    */
-  void static LCDCommandMode();
+  void static displayCommandMode();
 
   /**
    * Return the display width.
@@ -304,7 +360,7 @@ public:
   void static flipHorizontal(bool flipped);
 
   /// send a single byte command to the OLED
-  void static sendLCDCommand(uint8_t command);
+  void static sendDisplayCommand(uint8_t command);
 
   /**
    * Set the light output of the RGB LED.
@@ -362,8 +418,10 @@ protected:
 
 
 private:
+#ifdef ARDUINO_ARCH_AVR
   volatile static uint8_t *csport, *dcport;
   uint8_t static cspinmask, dcpinmask;
+#endif
 
 };
 

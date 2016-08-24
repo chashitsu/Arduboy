@@ -65,7 +65,7 @@ void setup() {
 // this is where our game logic goes.
 void loop() {
   // pause render until it's time for the next frame
-  if (!(arduboy.nextFrame())) return;
+  if (!(arduboy.newFrame())) return;
 
   // the next couple of lines will deal with checking if the D-pad buttons
   // are pressed and move our text accordingly.

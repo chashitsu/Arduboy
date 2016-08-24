@@ -34,7 +34,9 @@ void ArduboyBase::begin()
   boot();       // raw hardware
   blank();      // blank the display
   flashlight(); // start the flashlight if the UP button is held
+#ifndef ARDUBOY_Z
   systemButtons(); // check for the presence of any held system buttons
+#endif
   bootLogo();      // display the boot logo
   audio.begin();   // start the audio
 }
@@ -45,7 +47,7 @@ void ArduboyBase::flashlight()
     return;
 
   // turn all pixels on
-  sendLCDCommand(OLED_ALL_PIXELS_ON);
+  sendDisplayCommand(OLED_ALL_PIXELS_ON);
   // turn red, green and blue LEDS on for white light
   digitalWriteRGB(RGB_ON, RGB_ON, RGB_ON);
 
@@ -54,9 +56,10 @@ void ArduboyBase::flashlight()
     idle();
 
   digitalWriteRGB(RGB_OFF, RGB_OFF, RGB_OFF);
-  sendLCDCommand(OLED_PIXELS_FROM_RAM);
+  sendDisplayCommand(OLED_PIXELS_FROM_RAM);
 }
 
+#ifndef ARDUBOY_Z
 void ArduboyBase::systemButtons()
 {
   while (pressed(B_BUTTON))
@@ -84,6 +87,7 @@ void ArduboyBase::sysCtrlSound(uint8_t buttons, uint8_t led, uint8_t eeVal)
     while (pressed(buttons)) {} // Wait for button release
   }
 }
+#endif
 
 void ArduboyBase::bootLogo()
 {
@@ -220,24 +224,32 @@ int ArduboyBase::cpuLoad()
 
 void ArduboyBase::initRandomSeed()
 {
+#ifdef ARDUINO_ARCH_SAMD
+  // TODO can this be made better?
+  randomSeed(analogRead(A4) * ~micros() + micros());
+#else
   power_adc_enable();  // ADC on
   randomSeed(~rawADC(ADC_TEMP) * ~rawADC(ADC_VOLTAGE) * ~micros() + micros());
   power_adc_disable(); // ADC off
+#endif
 }
 
+// TODO add SAMD equivalent?
+#ifdef ARDUINO_ARCH_AVR
 uint16_t ArduboyBase::rawADC(uint8_t adc_bits)
 {
   ADMUX = adc_bits;
   // we also need MUX5 for temperature check
   if (adc_bits == ADC_TEMP)
-    ADCSRB = _BV(MUX5);
+    ADCSRB = bit(MUX5);
 
   delay(2);                        // Wait for ADMUX setting to settle
-  ADCSRA |= _BV(ADSC);             // Start conversion
+  ADCSRA |= bit(ADSC);             // Start conversion
   while (bit_is_set(ADCSRA,ADSC)); // measuring
 
   return ADC;
 }
+#endif
 
 /* Graphics */
 
@@ -278,16 +290,16 @@ void ArduboyBase::drawPixel(int x, int y, uint8_t color)
 
   uint8_t row = (uint8_t)y / 8;
   if (color)
-    sBuffer[(row*WIDTH) + (uint8_t)x] |=   _BV((uint8_t)y % 8);
+    sBuffer[(row*WIDTH) + (uint8_t)x] |=   bit((uint8_t)y % 8);
   else
-    sBuffer[(row*WIDTH) + (uint8_t)x] &= ~ _BV((uint8_t)y % 8);
+    sBuffer[(row*WIDTH) + (uint8_t)x] &= ~ bit((uint8_t)y % 8);
 }
 
 uint8_t ArduboyBase::getPixel(uint8_t x, uint8_t y)
 {
   uint8_t row = y / 8;
   uint8_t bit_position = y % 8;
-  return (sBuffer[(row*WIDTH) + x] & _BV(bit_position)) >> bit_position;
+  return (sBuffer[(row*WIDTH) + x] & bit(bit_position)) >> bit_position;
 }
 
 void ArduboyBase::drawCircle(int16_t x0, int16_t y0, uint8_t r, uint8_t color)
@@ -535,11 +547,7 @@ void ArduboyBase::fillRect(int16_t x, int16_t y, uint8_t w, uint8_t h,
 
 void ArduboyBase::fillScreen(uint8_t color)
 {
-  // C version :
-  //
-  // if (color) color = 0xFF;  //change any nonzero argument to b11111111 and insert into screen array.
-  // for(int16_t i=0; i<1024; i++)  { sBuffer[i] = color; }  //sBuffer = (128*64) = 8192/8 = 1024 bytes.
-
+#ifdef ARDUINO_ARCH_AVR
   asm volatile
   (
     // load color value into r27
@@ -569,6 +577,14 @@ void ArduboyBase::fillScreen(uint8_t color)
     : "r" (sBuffer), "r" (color)
     : "r30", "r31", "r27"
   );
+#else
+  // TODO add assembler version for SAMD
+  //change any nonzero argument to b11111111 and insert into screen array.
+  if (color)
+    color = B11111111;
+
+  memset(sBuffer, color, HEIGHT * WIDTH / 8);
+#endif
 }
 
 void ArduboyBase::drawRoundRect(int16_t x, int16_t y, uint8_t w, uint8_t h,
@@ -876,6 +892,7 @@ size_t Arduboy::write(uint8_t c)
       write('\n');
     }
   }
+  return 1;
 }
 
 void Arduboy::setCursor(int16_t x, int16_t y)
